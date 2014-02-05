@@ -1,4 +1,4 @@
 DC-Emergency-Response
 =====================
 
-Raw data for this project can be found at: https://www.dropbox.com/sh/c59b4mqyuqm43ph/rqU4Dpu9ji
+Find raw and manipulated data for this project in the attached data folder. Notes on the progress of this project and ideas for next steps can be found here: https://hackpad.com/Emergency-Response
