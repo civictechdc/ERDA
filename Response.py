@@ -1,78 +1,75 @@
 import csv
 
-# Open and read file
-data = open('fullEmergencyData.csv', "r")
-emer = csv.reader(data)
-emer.next()
+def stringToDate(strDate):
+	secs = 0
+	if strDate:
+		time = strDate.split(":")
+		secs = (int(time[0]) * 3600) + (int(time[1]) * 60) + int(time[2])
+	return secs
 
-# Final Columns
-response_time = []
-vehicle_type = []
-city_quadrant = []
-time_of_day = []
-month = []
-holiday = []
+def translateVehicleType(strVehicle):
+	if vehicle == "MED" or vehicle == "AMB" or vehicle == "EMS SUP":
+		return "Medical"
+	elif vehicle == "ENG" or vehicle == "TRUCK":
+		 return "Fire"
+	elif vehicle == "OTH":
+		return "Other"
+	else:
+		return strVehicle
 
-# Response Time
-for row in emer:
-    time = row[4]
-    time = time.split(":")
+def stringToQuadrant(strQuadrant):
+	addr = strQuadrant.strip()
+	quad = addr.split(" ")
+	if "NW" in quad:
+		return "NW"
+	elif "NE" in quad:
+		return "NE"
+	elif "SW" in quad:
+		return "SW"
+	elif "SE" in quad:
+		return "SE"
+	else:
+		return "NA"
 
-    if time[0] == '00':
-        secs = (int(time[0]) * 3600) + (int(time[1]) * 60) + int(time[2])
-        response_time.append(secs)
-    else:
-        response_time.append("NA")
+if __name__ == "__main__":
+	# Open and read file
+	data = open('fullEmergencyData.csv', "r")
+	emer = csv.DictReader(data)
 
-# Vehicle Type
-    vehicle = row[5]
-    if vehicle == "MED" or vehicle == "AMB" or vehicle == "EMS SUP":
-        vehicle_type.append("Medical")
-    elif vehicle == "ENG" or vehicle == "TRUCK":
-        vehicle_type.append("Fire")
-    elif vehicle == "OTH":
-        vehicle_type.append("Other")
-    else:
-        vehicle_type.append("NA")
-        
-# City Quadrant
-    address = row[3]
-    addr = row[3].strip()
-    if addr[len(addr) - 2 : len(addr)] == "NW":
-        city_quadrant.append("NW")
-    elif addr[len(addr) - 2 : len(addr)] == "NE":
-        city_quadrant.append("NE")
-    elif addr[len(addr) - 2 : len(addr)] == "SW":
-        city_quadrant.append("SW")
-    elif addr[len(addr) - 2 : len(addr)] == "SE":
-        city_quadrant.append("SE")
-    else:
-        quad = addr.split(" ")
-        if "NW" in quad:
-            city_quadrant.append("NW")
-        elif "NE" in quad:
-            city_quadrant.append("NE")
-        elif "SW" in quad:
-            city_quadrant.append("SW")
-        elif "SE" in quad:
-            city_quadrant.append("SE")
-        else:
-            city_quadrant.append("NA")
+	# Final Columns
+	response_time = []
+	vehicle_type = []
+	city_quadrant = []
+	time_of_day = []
+	month = []
+	holiday = []
 
-# Time of Day
-    hr = int((row[2].split(":"))[0])
-    time_of_day.append(hr)
+	# Response Time
+	for row in emer:
+		time = row['Response.Time..HH.MM.SS.']
+		
+		response_time.append(stringToDate(time))
 
-# Month
-    mon = int((row[1].split("/"))[0])
-    month.append(mon)
+	# Vehicle Type
+		vehicle = row['Unit']
+		vehicle_type.append(translateVehicleType(vehicle))
+			
+	# City Quadrant
+		address = row['Location']
+		city_quadrant.append(stringToQuadrant(address))
+		
+	# Time of Day
+		hr = int((row['Dispatch.Time..HH.MM.SS.'].split(":"))[0])
+		time_of_day.append(hr)
 
-# Write to CSV
-rows = zip(response_time, vehicle_type, city_quadrant, time_of_day, month)
+	# Month
+		mon = int((row['Date'].split("/"))[0])
+		month.append(mon)
 
-with open('test.csv', 'wb') as f:
-    writer = csv.writer(f)
-    for row in rows:
-        writer.writerow(rows)
+	# Write to CSV
+	rows = zip(response_time, vehicle_type, city_quadrant, time_of_day, month)
 
-
+	with open('test.csv', 'w') as f:
+		writer = csv.writer(f)
+		for row in rows:
+			writer.writerow(row)
