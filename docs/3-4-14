@@ -1,0 +1,53 @@
+Meeting notes
+
+Bianual reports
+	2007 NY reporter attacked, Fire dept thought he was drunk, hours to attention, died hereafter.
+	report released after.
+	Recomendations made.
+	
+	4 reports to date.
+	Crosscheck explanations with other sources.
+	Out-of-range response times.
+	EMS response time reports
+		Average response
+			per date
+
+	I think Ryan is FOI this.
+
+Mixing of police data with ems response time.
+	Crosscheck response time between the two.
+
+Using models to see if we can model response times, comparing re-routing and no re-routing.
+	What are their dispatch policies?
+	Remember, modeling can make assumptions
+		Monte carlo simulations
+
+Staffing data
+	Would staffing impact response time?
+		Whitney thinks this is picked up by other data.
+			
+Vehicle/Equipment data
+	
+
+Dispatch time: From dept. to location. (dispatch to scene)
+Shot time: Unified comms dept. Call to 911. (Call to dispatch)
+
+
+
+
+Gabe:
+	Map- Heat map
+		Frequency of location
+		Response time
+
+Ryan:
+	FOI
+
+Alex:
+	R Analysis. Magic.
+	Check for gaps in data (the line graph he made had a lot of regular gaps)
+
+
+In terms of data analysis:
+	General statistics for week, month, year
+	
