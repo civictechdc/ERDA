@@ -1,0 +1,4 @@
+name: ERDA
+markdown: redcarpet
+pygments: true
+exclude: ['README.md']
