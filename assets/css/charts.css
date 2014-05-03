@@ -1,0 +1,25 @@
+svg {
+  background-color:  #ffffff;
+  width:                100%;
+  -webkit-border-radius: 8px;
+  -moz-border-radius:    8px;
+  -khtml-border-radius:  8px;
+  border-radius:         8px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #aaa;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  fill: #666;
+  font-size: 10pt;
+}
+
+.bar {
+  fill: #6af;
+}
