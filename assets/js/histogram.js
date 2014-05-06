@@ -126,6 +126,7 @@ function histogram() {
   function renderViz() {
     var newHeight = parent.node().clientWidth*0.67;
     parent.style('height', newHeight);
+    parent.style("visibility", "visible");
     
     var xMax = roundDuration(d3.max(data));
     x = d3.scale.linear()
