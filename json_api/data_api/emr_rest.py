@@ -24,7 +24,7 @@ def not_found(error):
 @app.route("/emr_data/", methods=['GET'])
 @cross_origin()
 def test():
-	#returns a list of emr responses - with limit and offset arguments
+	#returns a list of emr responses - with page  and  per_page  arguments
 	
 	page = int(request.args.get('page', 1))
 	results_per_page = int(request.args.get('per_page', 50))
