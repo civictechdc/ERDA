@@ -1,6 +1,6 @@
 import csv
 
-def stringToDate(strDate):
+def timeToSeconds(strDate):
 	secs = 0
 	if strDate:
 		time = strDate.split(":")
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 	for row in emer:
 		time = row['Response.Time..HH.MM.SS.']
 		
-		response_time.append(stringToDate(time))
+		response_time.append(timeToSeconds(time))
 
 	# Vehicle Type
 		vehicle = row['Unit']
@@ -73,3 +73,4 @@ if __name__ == "__main__":
 		writer = csv.writer(f)
 		for row in rows:
 			writer.writerow(row)
+
