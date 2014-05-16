@@ -1,11 +1,12 @@
 /*
-Histogram of response times.
+Histogram of response times. Accepts an array of response times in minutes, or
+an array of precomputed histogram bins.
 */
 function histogram() {
   // defaults
   var parent = undefined;
   var data = [];
-  var binnedData = [];
+  var bins = [];
   var maxTime;
   var margin = {
     top: 20,
@@ -27,11 +28,22 @@ function histogram() {
   }
 
   // Rounds durations up to the nearest multiple of 10 minutes.
-  function roundDuration(ms) {
-    var tenMinutes = 10*60;
-    return Math.ceil(ms/tenMinutes)*tenMinutes;
+  function roundDuration(duration) {
+    return Math.ceil(duration/10)*10;
   }
 
+  function xMax() {
+    if (data.length) {
+      return roundDuration(data[data.length - 1]);
+    } else if (bins.length) {
+      var last = bins[bins.length - 1];
+      return last.x + last.dx;
+    } else {
+      return 0;
+    }
+  }
+
+  // Computes x values for numTicks evenly spaced ticks.
   function xTicks(numTicks) {
     var xMax = x.domain()[1];
     var ticks = [];
@@ -77,7 +89,7 @@ function histogram() {
       .orient("bottom")
       .tickValues(xTicks(5))
       .tickFormat(function(d) {
-        return Math.floor(d/60);
+        return Math.floor(d);
       });
     var yAxis = d3.svg.axis()
       .scale(y)
@@ -107,7 +119,7 @@ function histogram() {
   function renderData() {
     var dataLayer = parent.selectAll('g.data-layer');
     var bars = dataLayer.selectAll('g.bar')
-      .data(binnedData);
+      .data(bins);
     var barsEnter = bars.enter().append('g')
       .attr('class', 'bar');
     bars
@@ -117,7 +129,7 @@ function histogram() {
     barsEnter.append('rect');
     bars.selectAll('rect')
       .attr('x', 1)
-      .attr('width', x(binnedData[0].dx) - 1)
+      .attr('width', x(bins[0].dx) - 1)
       .attr('height', function(d) {
         return height() - y(d.y);
       });
@@ -127,19 +139,24 @@ function histogram() {
     var newHeight = parent.node().clientWidth*0.67;
     parent.style('height', newHeight);
     parent.style("visibility", "visible");
+
+    if (!data.length && !bins.length) {
+      return;
+    }
     
-    var xMax = roundDuration(d3.max(data));
     x = d3.scale.linear()
-      .domain([0, xMax])
+      .domain([0, xMax()])
       .range([0, width()]);
     y = d3.scale.linear()
       .range([height(), 0]);
 
-    var hist = d3.layout.histogram()
-      .bins(xTicks(xMax/60));
-    binnedData = hist(data);
+    if (data.length && !bins.length) {
+      var ticks = xTicks(xMax());
+      var hist = d3.layout.histogram().bins(ticks);
+      bins = hist(data);
+    }
     
-    y.domain([0, d3.max(binnedData, function(d) {
+    y.domain([0, d3.max(bins, function(d) {
       return d.y;
     })]);
 
@@ -153,6 +170,13 @@ function histogram() {
   chart.data = function(value) {
     if (!arguments.length) return data;
     data = value;
+
+    return chart;
+  };
+
+  chart.bins = function(value) {
+    if (!arguments.length) return bins;
+    bins = value;
 
     return chart;
   };
