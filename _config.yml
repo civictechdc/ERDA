@@ -1,4 +1,5 @@
 name: ERDA
+baseurl: /ERDA
 markdown: redcarpet
 pygments: true
 exclude: ['README.md']
