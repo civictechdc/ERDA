@@ -90,13 +90,16 @@ header h2 {
 }
 
 .inner {
-  width: 620px;
+  width: 720px;
   margin: 0 auto;
 }
 
+/* Disable for Google Maps. */
+/*
 #container .inner img {
   max-width: 100%;
 }
+*/
 
 #downloads {
   margin-bottom: 40px;

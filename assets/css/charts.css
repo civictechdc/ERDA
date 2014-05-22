@@ -1,4 +1,4 @@
-svg {
+#histogram {
   background-color:  #ffffff;
   width:                100%;
   -webkit-border-radius: 8px;
@@ -23,4 +23,17 @@ svg {
 
 .bar {
   fill: #6af;
+}
+
+#map {
+  width: 100%;
+}
+
+svg.emergency-event {
+  position: absolute;
+}
+
+.emergency-event circle {
+  fill: #f0a;
+  fill-opacity: 0.2;
 }
