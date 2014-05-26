@@ -1,29 +1,11 @@
 # User provides a path to the folder containing the original response times
 ## This script takes the 4 csv files, binds them together, does some basic parsing, and writes to a file. 
 ## Another file should be used to map latitude and longditude coordinates to street addresses
-from os import listdir
-from os.path import isfile, join	
-import csv
+import sys
 import glob
 import pandas as pd
+import csv
 
-# Takes in a string time value in HH:MM:SS format, outputting an integer seconds
-def stringToSeconds(strDate):
-	secs = 0
-	if strDate:
-		time = strDate.split(":")
-		secs = (int(time[0]) * 3600) + (int(time[1]) * 60) + int(time[2])
-	return secs
-# sorts the response vehicle types into Medical, Fire, or Other
-def translateVehicleType(strVehicle):
-	if vehicle == "MED" or vehicle == "AMB" or vehicle == "EMS SUP":
-		return "Medical"
-	elif vehicle == "ENG" or vehicle == "TRUCK":
-		 return "Fire"
-	elif vehicle == "OTH":
-		return "Other"
-	else:
-		return strVehicle
 # Parses out the quadrant from the address
 def stringToQuadrant(strQuadrant):
 	addr = strQuadrant.strip()
@@ -39,70 +21,62 @@ def stringToQuadrant(strQuadrant):
 	else:
 		return "NA"
 
+def convert_to_csv(data_path, events):
+	print('Converting to CSV...')
+	print(events.shape)
+	csv_rows = [['Date', 'Dispatch Time', 'Address', 'Quadrant', 'Response Time', 'Unit']]
 
+	i = 0
+	for index, event in events.iterrows():
+		i += 1
+		date = event['Date'].date()
+		time = event['Dispatch Time (HH:MM:SS)']
+		address = event['Location']
+		quadrant = ''
+		if (not isinstance(address, str)):
+			print('Warning: empty address detected:', i, date, time)
+			address = ''
+		else:
+			address = address.strip()
+			quadrant = stringToQuadrant(address)
+		response_time = event['Response Time (HH:MM:SS)']
+		unit = event['Unit']
+		csv_rows.append([date, time, address, quadrant, response_time, unit])
 
+	csv_path = data_path + '/dc-emergency-response-data.csv'
+	with open(csv_path, 'w') as csv_file:
+		writer = csv.writer(csv_file)
+		for row in csv_rows:
+			writer.writerow(row)
+
+def import_event(row):
+	event = []
+	for col in row:
+		event.append(col.value)
+	return event
+
+def import_erda_file(file_name):
+	'''Imports an Excel file with the specified name.'''
+	print(file_name)
+	xl_file = pd.ExcelFile(file_name)
+	data_frame = xl_file.parse('DATA')
+	print(data_frame.shape)
+	return data_frame
+
+def import_erda_files(data_path):
+	'''Imports all Excel files in the specified directory.'''
+	file_names = glob.glob(data_path + "/*.xlsx")
+	data_frames = []
+	for file_name in file_names:
+		data_frames.append(import_erda_file(file_name))
+	convert_to_csv(data_path, pd.concat(data_frames))
+
+def usage():
+	'''Prints a help string.'''
+	print("usage: Response.py <dirname>")
 
 if __name__ == "__main__":
-
-	mypath = raw_input('What is the path to the ERDA data? \n ')
-
-	# Get all files in the specified directory
-	erdafiles = [ f for f in listdir(mypath) if isfile(join(mypath,f)) ]
-
-	print(erdafiles)
-
-	e1 = open(mypath + "/" + erdafiles[0], "r")
-	e2 = open(mypath + "/" + erdafiles[1], "r")
-	allFiles = glob.glob(mypath + "/*.csv")
-frame = pd.DataFrame()
-list = []
-for files in allFiles:
-    df = pd.read_csv(join(mypath,files),index_col=None, header=0)
-    list.append(df)
-frame = pd.concat(list)
-
-	# Open and read file
-	#	data = open('fullEmergencyData.csv', "r")
-	#	emer = csv.DictReader(data)
-
-# Final Columns
-response_time = []
-vehicle_type = []
-city_quadrant = []
-time_of_day = []
-month = []
-holiday = []
-
-emer = frame
-#print(frame['Response.Time..HH.MM.SS.', ])
-# Response Time
-for row in emer:
-	print(row)
-	time = row['Response.Time..HH.MM.SS.']
-	
-	response_time.append(stringToSeconds(time))
-	
-# Vehicle Type
-	vehicle = row['Unit']
-	vehicle_type.append(translateVehicleType(vehicle))
-		
-# City Quadrant
-	address = row['Location']
-	city_quadrant.append(stringToQuadrant(address))
-	
-# Time of Day
-	hr = int((row['Dispatch.Time..HH.MM.SS.'].split(":"))[0])
-	time_of_day.append(hr)
-
-# Month
-	mon = int((row['Date'].split("/"))[0])
-	month.append(mon)
-
-# Write to CSV
-rows = zip(response_time, vehicle_type, city_quadrant, time_of_day, month)
-
-with open('test.csv', 'w') as f:
-	writer = csv.writer(f)
-	for row in rows:
-		writer.writerow(row)
-
+	if (len(sys.argv) == 2):
+		import_erda_files(sys.argv[1])
+	else:
+		usage()
