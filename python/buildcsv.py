@@ -1,15 +1,18 @@
-# User provides a path to the folder containing the original response times
-## This script takes the 4 csv files, binds them together, does some basic parsing, and writes to a file. 
-## Another file should be used to map latitude and longditude coordinates to street addresses
+#! /usr/bin/env python
+# encoding: utf-8
+
+'''
+Converts and merges multiple .xlsx Excel files containing DC emergency response
+data into a single .csv file.
+'''
 import sys
 import glob
 import pandas as pd
 import csv
 
-# Parses out the quadrant from the address
-def stringToQuadrant(strQuadrant):
-	addr = strQuadrant.strip()
-	quad = addr.split(" ")
+def address_to_quadrant(address):
+	'''Parses out the quadrant from an address string.'''
+	quad = address.strip().split(" ")
 	if "NW" in quad:
 		return "NW"
 	elif "NE" in quad:
@@ -38,7 +41,7 @@ def convert_to_csv(data_path, events):
 			address = ''
 		else:
 			address = address.strip()
-			quadrant = stringToQuadrant(address)
+			quadrant = address_to_quadrant(address)
 		response_time = event['Response Time (HH:MM:SS)']
 		unit = event['Unit']
 		csv_rows.append([date, time, address, quadrant, response_time, unit])
@@ -73,7 +76,7 @@ def import_erda_files(data_path):
 
 def usage():
 	'''Prints a help string.'''
-	print("usage: Response.py <dirname>")
+	print("usage: buildcsv.py <dirname>")
 
 if __name__ == "__main__":
 	if (len(sys.argv) == 2):
