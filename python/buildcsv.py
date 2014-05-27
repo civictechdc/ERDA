@@ -35,13 +35,11 @@ def convert_to_csv(data_path, events):
 		date = event['Date'].date()
 		time = event['Dispatch Time (HH:MM:SS)']
 		address = event['Location']
-		quadrant = ''
 		if (not isinstance(address, str)):
-			print('Warning: empty address detected:', i, date, time)
-			address = ''
-		else:
-			address = address.strip()
-			quadrant = address_to_quadrant(address)
+			print('Warning: skipping record with empty address:', i, date, time)
+			continue
+		address = address.strip()
+		quadrant = address_to_quadrant(address)
 		response_time = event['Response Time (HH:MM:SS)']
 		unit = event['Unit']
 		csv_rows.append([date, time, address, quadrant, response_time, unit])
