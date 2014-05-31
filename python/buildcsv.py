@@ -10,38 +10,51 @@ import glob
 import pandas as pd
 import csv
 
-def address_to_quadrant(address):
-	'''Parses out the quadrant from an address string.'''
-	quad = address.strip().split(" ")
-	if "NW" in quad:
-		return "NW"
-	elif "NE" in quad:
+def address_quadrant(address):
+	'''Parses out the quadrant from an address string, if it contains one.'''
+	quad = address.strip().split(' ')
+	if 'NW' in quad:
+		return 'NW'
+	elif 'NE' in quad:
 		return "NE"
-	elif "SW" in quad:
-		return "SW"
-	elif "SE" in quad:
-		return "SE"
+	elif 'SW' in quad:
+		return 'SW'
+	elif 'SE' in quad:
+		return 'SE'
 	else:
-		return "NA"
+		return 'NA'
 
-def convert_to_csv(data_path, events):
-	print('Converting to CSV...')
-	print(events.shape)
+def normalize_address(address):
+	return address.strip().upper()
+
+def print_summary(num_valid, errors):
+	num_no_address = sum(e[0] == 'no address' for e in errors)
+	num_blank_address = sum(e[0] == 'blank address' for e in errors)
+	print(num_valid, 'valid incident(s) processed.')
+	print(len(errors), 'incident(s) were excluded:')
+	print(num_no_address, 'incident(s) had an empty address field.')
+	print(num_blank_address, 'incident(s) had an address of "BLANK".')
+
+def convert_to_csv(data_path, incidents):
 	csv_rows = [['Date', 'Dispatch Time', 'Address', 'Quadrant', 'Response Time', 'Unit']]
+	errors = []
 
 	i = 0
-	for index, event in events.iterrows():
+	for index, incident in incidents.iterrows():
 		i += 1
-		date = event['Date'].date()
-		time = event['Dispatch Time (HH:MM:SS)']
-		address = event['Location']
+		date = incident['Date'].date()
+		time = incident['Dispatch Time (HH:MM:SS)']
+		address = incident['Location']
 		if (not isinstance(address, str)):
-			print('Warning: skipping record with empty address:', i, date, time)
+			errors.append(('no address', incident))
 			continue
-		address = address.strip()
-		quadrant = address_to_quadrant(address)
-		response_time = event['Response Time (HH:MM:SS)']
-		unit = event['Unit']
+		address = normalize_address(address)
+		if (address == "BLANK"):
+			errors.append(('blank address', incident))
+			continue
+		quadrant = address_quadrant(address)
+		response_time = incident['Response Time (HH:MM:SS)']
+		unit = incident['Unit']
 		csv_rows.append([date, time, address, quadrant, response_time, unit])
 
 	csv_path = data_path + '/dc-emergency-response-data.csv'
@@ -50,18 +63,21 @@ def convert_to_csv(data_path, events):
 		for row in csv_rows:
 			writer.writerow(row)
 
-def import_event(row):
-	event = []
+	if (len(errors) > 0):
+		print_summary(len(csv_rows) - 1, errors)
+
+def import_incident(row):
+	incident = []
 	for col in row:
-		event.append(col.value)
-	return event
+		incident.append(col.value)
+	return incident
 
 def import_erda_file(file_name):
 	'''Imports an Excel file with the specified name.'''
 	print(file_name)
 	xl_file = pd.ExcelFile(file_name)
 	data_frame = xl_file.parse('DATA')
-	print(data_frame.shape)
+	print(data_frame.shape[0], 'incident(s)')
 	return data_frame
 
 def import_erda_files(data_path):
@@ -70,7 +86,10 @@ def import_erda_files(data_path):
 	data_frames = []
 	for file_name in file_names:
 		data_frames.append(import_erda_file(file_name))
-	convert_to_csv(data_path, pd.concat(data_frames))
+
+	incidents = pd.concat(data_frames)
+	print(incidents.shape[0], 'incident(s) loaded.')
+	convert_to_csv(data_path, incidents)
 
 def usage():
 	'''Prints a help string.'''
