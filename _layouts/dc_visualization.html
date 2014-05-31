@@ -1,0 +1,47 @@
+---
+---
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/yepnope/1.5.4/yepnope.min.js"></script>
+    <script type="text/javascript">
+      yepnope([
+        [
+          '//cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js',
+          'ielt9!///cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js',
+          'iegt8!other!//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js',
+          '//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js',
+          '//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.7/crossfilter.min.js',
+          'ielt9!//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.js'
+        ],
+        [
+          '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js',
+          '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.css',
+          '//cdnjs.cloudflare.com/ajax/libs/dc/1.6.0/dc.min.js',
+          '//cdnjs.cloudflare.com/ajax/libs/dc/1.6.0/dc.min.css',
+          '//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js'
+        ],
+        {
+          load : '{{site.baseurl}}/assets/js/erda-visualization.js',
+          complete : function(){
+            function init(){
+              var router = new window.Router();
+              Backbone.history.start();
+            }
+            if(document.readyState === 'complete')
+              init();
+            else
+              $(init);
+          }
+        } 
+      ]);
+    </script>
+    <title>{{page.title}}</title>
+  </head>
+  <body>
+  {{content}}
+  </body>
+</html>
