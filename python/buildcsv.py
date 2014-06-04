@@ -60,7 +60,7 @@ def convert_to_csv(data_path, incidents):
 		unit = incident['Unit']
 		csv_rows.append([date, time, address, quadrant, response_time, unit])
 
-	csv_path = data_path + '/dc-emergency-response-data.csv'
+	csv_path = data_path + '/incidents.csv'
 	addresses_path = data_path + '/addresses.csv'
 	with open(csv_path, 'w') as csv_file:
 		writer = csv.writer(csv_file)
