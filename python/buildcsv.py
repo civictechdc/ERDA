@@ -7,6 +7,7 @@ data into a single .csv file.
 '''
 import sys
 import glob
+from collections import defaultdict, OrderedDict
 import pandas as pd
 import csv
 
@@ -38,6 +39,7 @@ def print_summary(num_valid, errors):
 def convert_to_csv(data_path, incidents):
 	csv_rows = [['Date', 'Dispatch Time', 'Address', 'Quadrant', 'Response Time', 'Unit']]
 	errors = []
+	addresses = defaultdict(int)
 
 	i = 0
 	for index, incident in incidents.iterrows():
@@ -52,16 +54,23 @@ def convert_to_csv(data_path, incidents):
 		if (address == "BLANK"):
 			errors.append(('blank address', incident))
 			continue
+		addresses[address] += 1
 		quadrant = address_quadrant(address)
 		response_time = incident['Response Time (HH:MM:SS)']
 		unit = incident['Unit']
 		csv_rows.append([date, time, address, quadrant, response_time, unit])
 
 	csv_path = data_path + '/dc-emergency-response-data.csv'
+	addresses_path = data_path + '/addresses.csv'
 	with open(csv_path, 'w') as csv_file:
 		writer = csv.writer(csv_file)
 		for row in csv_rows:
 			writer.writerow(row)
+	sorted_addresses = OrderedDict(sorted(addresses.items(), key=lambda t: t[0]))
+	with open(addresses_path, 'w') as addresses_file:
+		writer = csv.writer(addresses_file)
+		for address, count in sorted_addresses.items():
+			writer.writerow([address])
 
 	if (len(errors) > 0):
 		print_summary(len(csv_rows) - 1, errors)
