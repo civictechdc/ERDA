@@ -93,8 +93,8 @@ def hist():
 	bucket = int(request.args.get('bucket', 60))
 	emr_data = db.events
 	emr_data.aggregate([{ '$project' :
-			{'bucket' : {'$divide' :[{'$subtract' : ['$response_seconds',
-						 {'$mod' : ['$response_seconds', bucket]}]}, bucket]
+			{'bucket' : {'$divide' :[{'$subtract' : ['$Response Seconds',
+						 {'$mod' : ['$Response Seconds', bucket]}]}, bucket]
 				}
 			}
 			},
