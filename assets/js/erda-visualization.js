@@ -294,12 +294,12 @@
 						this.updateParams({
 							'start-time' : info.filter[0],
 							'end-time' : info.filter[1]
-						});
+						}, true);
 						break;
 					case 'incidentType':
 						this.updateParams({
 							'type' : info.filter
-						});
+						}, true);
 						break;
 					default:
 						return;
@@ -307,7 +307,8 @@
 			}
 		},
 
-		updateParams : function(params){
+		updateParams : function(params, updateFromControl){
+			this.updateFromControl = !!updateFromControl;
 			window.location.hash = $.param(_.defaults(params, this.params), true);
 		},
 
@@ -360,6 +361,8 @@
 								}
 							}, this);
 						}
+						else 
+							this.updateFromControl = false;
 				}
 		}
 	});
