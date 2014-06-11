@@ -332,7 +332,7 @@
 					}, this);
 					this.breadcrumbs.update(this.params);
 					if(!this.updateFromControl){
-						var startTime, endTime;
+						/*var startTime, endTime;
 						_(this.params).forOwn(function(val, key){
 							switch(key){
 								case 'type':
@@ -359,7 +359,7 @@
 									}
 									break;
 								}
-							}, this);
+							}, this);*/
 						}
 						else 
 							this.updateFromControl = false;
