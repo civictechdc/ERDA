@@ -111,7 +111,7 @@
 				.elasticX(true)
 				.height(this.$el.height())
 				.width(this.$el.width())
-				.filterHandler(_.bindKey(this, 'filterHandler'))
+				//.filterHandler(_.bindKey(this, 'filterHandler'))
 				.render();
 			this.trigger('render');
 		},
@@ -121,6 +121,8 @@
 				type : 'incidentType',
 				filter : filter
 			});
+			dimension.filter(filter);
+			return filter;
 		}
 	});
 
@@ -138,7 +140,7 @@
 				.group(this.model.get('responseMinutesGroup'))
 				.height(this.$el.height())
 				.width(this.$el.width())
-				.filterHandler(_.bindKey(this, 'filterHandler'))
+				//.filterHandler(_.bindKey(this, 'filterHandler'))
 				.xUnits(function(){return 30;})
 				.x(d3.scale.linear().domain(extents))
 				.render();
@@ -150,6 +152,8 @@
 				type : 'responseMinutes',
 				filter : filter[0]
 			});
+			dimension.filter(filter);
+			return filter;
 		}
 	});
 
