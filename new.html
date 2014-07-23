@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/dc/1.7.1/dc.css">
+    <style type="text/css">
+      #heatmap {
+        height: 400px;
+      }
+    </style>
+    <script>
+      // Constants
+      var daysOfWeek = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' ];
+      var height = 150;
+      var margins = { top: 10, right: 10, bottom: 20, left: 40 };
+      var width = 360;
+
+      // Globals
+      var charts = {}, dimensions, heatmap, incidents;
+    </script>
+  </head>
+  <body>
+    <div id="viz" style="display:none;">
+
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-12" id="count">
+            <h1>ERDA <strong class="filter-count"></strong> selected out of <strong class="total-count"></strong> records</h1>
+            <h4>ERDA (Emergency Response Data Analysis) is an effort to apply statistical analysis to emergency response data obtained from the city of Washington, DC.</h4>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-12" id="heatmap"></div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-2" id="service">
+            <h4>Service</h4>
+            <span class="filter"></span>
+            <a class="reset" href="javascript:charts.service.filterAll();dc.redrawAll('incidents');" style="display:none;">reset</a>
+
+            <div class="clearfix"></div>
+          </div>
+          <div class="col-sm-2" id="day">
+            <h4>Day</h4>
+            <a class="reset" href="javascript:charts.day.filterAll();dc.redrawAll('incidents');" style="display:none;">reset</a>
+            <div class="clearfix"></div>
+          </div>
+          <div class="col-sm-4" id="response-min">
+            <h4>Response Time</h4>
+            <span class="filter"></span>
+            <a class="reset" href="javascript:charts.response.filterAll();dc.redrawAll('incidents');" style="display:none;">reset</a>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.10/d3.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.7/crossfilter.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/dc/1.7.1/dc.js"></script>
+    <script src="//maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=visualization"></script>
+    <script>
+      var spinner = new Spinner().spin();
+      document.body.appendChild(spinner.el);
+
+      d3.csv('./data/incidents_with_latlongs.csv', parse, process);
+
+      function process(err, csv) {
+        if (err) return window.alert(err);
+
+        incidents = crossfilter(csv);
+        dimensions = dimensionify(incidents);
+
+        charts.count = dc.dataCount('#count', 'incidents')
+          .dimension(incidents)
+          .group(incidents.groupAll());
+
+        charts.service = dc.pieChart('#service', 'incidents')
+          .height(height)
+          .dimension(dimensions.byService)
+          .group(dimensions.byService.group());
+
+        charts.day = dc.pieChart('#day', 'incidents')
+          .height(height)
+          .label(function(d) { return daysOfWeek[d.data.key]; })
+          .dimension(dimensions.byDay)
+          .group(dimensions.byDay.group());
+
+        charts.response = dc.lineChart('#response-min', 'incidents')
+          .height(height)
+          .width(width)
+          .margins(margins)
+          .x(d3.scale.linear().domain([0, 30]))
+          .elasticY(true)
+          .round(Math.round)
+          .dimension(dimensions.byResponseMin)
+          .group(dimensions.byResponseMin.group());
+
+        dc.renderAll('incidents');
+        document.getElementById('viz').style.display = 'block';
+
+        showMap(dimensions.byUnit.top(Infinity)
+            .map(function(row) {
+              return row.ll;
+            })
+            .filter(function(ll) {
+              return !isNaN(ll.k) && !isNaN(ll.B);
+            }));
+
+        spinner.stop();
+      }
+
+      function dimensionify(i) {
+        return {
+          byDay: i.dimension(function(d) { return d.date.getDay(); }),
+          byHour: i.dimension(function(d) { return d.date.getHours(); }),
+          byResponseMin: i.dimension(function(d) { return d.response_min; }),
+          byService: i.dimension(function(d) { return d.service; }),
+          byUnit: i.dimension(function(d) { return d.unit; })
+        };
+      }
+
+      function parse(row) {
+        return {
+          date: new Date(row.year, row.month - 1, row.day, row.hour, row.minute, row.second),
+          ll: new google.maps.LatLng(parseFloat(row.latitude), parseFloat(row.longitude)),
+          service: row.service,
+          response_min: parseInt(row.response_min),
+          unit: row.unit
+        };
+      }
+
+      function showMap(lls) {
+        var mapOptions = {
+          zoom: 11,
+          center: new google.maps.LatLng(38.903725, -77.016202),
+          mapTypeId: google.maps.MapTypeId.ROADS
+        };
+
+        var map = new google.maps.Map(document.getElementById('heatmap'), mapOptions);
+        heatmap = new google.maps.visualization.HeatmapLayer({ data: lls });
+
+        heatmap.set('radius', 20);
+        heatmap.setMap(map);
+      }
+    </script>
+  </body>
+</html>
