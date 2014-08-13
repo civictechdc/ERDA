@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import openpyxl
 import csv
@@ -15,8 +15,8 @@ def writeCSV(filename, sheet, sheetname):
             c = csv.writer(f)
             for row in sheet.iter_rows():
                 c.writerow([cell.value for cell in row])
-#    else:
-#        print(filename + ": " + sheetname + " sheet could not be found! Continuing...", file=sys.stderr)
+    else:
+        print(filename + ": " + sheetname + " sheet could not be found! Continuing...", file=sys.stderr)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert XLSX files to CSV. Use \'--\' to separate sheet names and XLSX file names.')
@@ -35,3 +35,4 @@ if __name__ == "__main__":
             for sheetname in wb.get_sheet_names():
                 sheet = wb.get_sheet_by_name(name = sheetname)
                 writeCSV(csvfile, sheet, sheetname)
+
